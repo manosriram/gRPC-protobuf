@@ -1,3 +1,3 @@
 ```
-Exploring gRPC in go
+Exploring gRPC(go) and Protocol Buffers
 ```
