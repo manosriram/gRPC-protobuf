@@ -1,3 +1,3 @@
 ```
-Exploring gRPC in go
+Simple greeting using gRPC(go)
 ```
