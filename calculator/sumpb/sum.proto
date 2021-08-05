@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package sum;
+option go_package="calculator/sumpb";
+
+message Sum {
+    int32 x = 1;
+    int32 y = 2;
+};
+
+message SumRequest {
+    Sum sum = 1;
+};
+
+message SumResponse {
+    int32 z = 1;
+};
+
+service SumService {
+    rpc Sum(SumRequest) returns (SumResponse);
+};
