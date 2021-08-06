@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package prime;
+option go_package = "prime-number-decomposition/prime_pb";
+
+message Prime {
+    int32 x = 1;
+};
+
+message PrimeRequest {
+    Prime prime = 1;
+};
+
+message PrimeResponse {
+    int32 number = 1;
+};
+
+service PrimeService {
+    rpc PrimeDecomposition(PrimeRequest) returns (stream PrimeResponse) {};
+};
