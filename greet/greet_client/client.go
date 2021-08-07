@@ -6,6 +6,7 @@ import (
 	"grpc-ex/greet/greetpb"
 	"io"
 	"log"
+	"time"
 
 	"google.golang.org/grpc"
 )
@@ -41,6 +42,47 @@ func greet_many_times_driver(c greetpb.GreetServiceClient) {
 	}
 }
 
+func long_greet_driver(c greetpb.GreetServiceClient) {
+	fmt.Println("Starting to do Client streaming rpc")
+
+	stream, err := c.LongGreet(context.Background())
+	if err != nil {
+		log.Fatalf("Err while calling LongGreet() rpc %v", err)
+	}
+
+	requests := []*greetpb.LongGreetRequest{
+		&greetpb.LongGreetRequest{
+			Greet: &greetpb.Greeting{
+				FirstName: "Mano",
+				LastName:  "Sriram",
+			},
+		},
+		&greetpb.LongGreetRequest{
+			Greet: &greetpb.Greeting{
+				FirstName: "Virat",
+				LastName:  "Kohli",
+			},
+		},
+		&greetpb.LongGreetRequest{
+			Greet: &greetpb.Greeting{
+				FirstName: "Michael",
+				LastName:  "Jordan",
+			},
+		},
+	}
+
+	for _, req := range requests {
+		stream.Send(req)
+		time.Sleep(100 * time.Millisecond)
+	}
+
+	resp, err := stream.CloseAndRecv()
+	if err != nil {
+		log.Fatalf("Err while receiving response from LongGreet() %v", err)
+	}
+	fmt.Println(resp)
+}
+
 func main() {
 	fmt.Println("This is client")
 
@@ -52,5 +94,6 @@ func main() {
 	defer cc.Close()
 
 	c := greetpb.NewGreetServiceClient(cc)
-	greet_many_times_driver(c)
+	// greet_many_times_driver(c)
+	long_greet_driver(c)
 }
