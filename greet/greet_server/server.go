@@ -90,6 +90,7 @@ func (*server) GreetEveryone(stream greetpb.GreetService_GreetEveryoneServer) er
 }
 
 func main() {
+	fmt.Println("Starting Greet Server")
 	lis, err := net.Listen("tcp", "0.0.0.0:50051")
 
 	if err != nil {
