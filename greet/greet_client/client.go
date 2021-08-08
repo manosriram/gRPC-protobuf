@@ -83,6 +83,64 @@ func long_greet_driver(c greetpb.GreetServiceClient) {
 	fmt.Println(resp)
 }
 
+func greet_everyone_driver(c greetpb.GreetServiceClient) {
+	fmt.Println("Starting biDi streaming")
+
+	stream, err := c.GreetEveryone(context.Background())
+	if err != nil {
+		log.Fatalf("Err while receiving response from LongGreet() %v", err)
+	}
+
+	requests := []*greetpb.GreetEveryoneRequest{
+		&greetpb.GreetEveryoneRequest{
+			Greet: &greetpb.Greeting{
+				FirstName: "Mano",
+				LastName:  "Sriram",
+			},
+		},
+		&greetpb.GreetEveryoneRequest{
+			Greet: &greetpb.Greeting{
+				FirstName: "Virat",
+				LastName:  "Kohli",
+			},
+		},
+		&greetpb.GreetEveryoneRequest{
+			Greet: &greetpb.Greeting{
+				FirstName: "Michael",
+				LastName:  "Jordan",
+			},
+		},
+	}
+
+	wc := make(chan struct{})
+
+	go func() {
+		for _, req := range requests {
+			stream.Send(req)
+			fmt.Printf("Sending: %v", req)
+			time.Sleep(2 * time.Second)
+		}
+		stream.CloseSend()
+	}()
+
+	go func() {
+		for {
+			msg, err := stream.Recv()
+			if err == io.EOF {
+				close(wc)
+				break
+			}
+			if err != nil {
+				log.Fatalf("Failed to listen %v", err)
+				close(wc)
+			}
+			fmt.Printf("Received: %v", msg.GetResult())
+		}
+	}()
+
+	<-wc
+}
+
 func main() {
 	fmt.Println("This is client")
 
@@ -95,5 +153,6 @@ func main() {
 
 	c := greetpb.NewGreetServiceClient(cc)
 	// greet_many_times_driver(c)
-	long_greet_driver(c)
+	// long_greet_driver(c)
+	greet_everyone_driver(c)
 }
