@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"google.golang.org/grpc"
+	"google.golang.org/grpc/codes"
+	"google.golang.org/grpc/status"
 )
 
 func greet_driver(c greetpb.GreetServiceClient) {
@@ -141,6 +143,31 @@ func greet_everyone_driver(c greetpb.GreetServiceClient) {
 	<-wc
 }
 
+func greet_with_deadline_driver(c greetpb.GreetServiceClient, seconds time.Duration) {
+	req := &greetpb.GreetWithDeadlineRequest{
+		Greet: &greetpb.Greeting{
+			FirstName: "Mano",
+			LastName:  "Sriram",
+		},
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), seconds)
+	defer cancel()
+	res, err := c.GreetWithDeadline(ctx, req)
+	if err != nil {
+		status, ok := status.FromError(err)
+		if ok {
+			if status.Code() == codes.DeadlineExceeded {
+				fmt.Println("Timeout was hit, deadline exceeded")
+			} else {
+				fmt.Printf("Some error happened %v", err)
+			}
+		} else {
+			log.Fatalf("Err while calling GreetWithDeadline() rpc %v", err)
+		}
+	}
+	log.Printf("Response from GreetWithDeadline() %+v", res)
+}
+
 func main() {
 	fmt.Println("This is client")
 
@@ -154,5 +181,7 @@ func main() {
 	c := greetpb.NewGreetServiceClient(cc)
 	// greet_many_times_driver(c)
 	// long_greet_driver(c)
-	greet_everyone_driver(c)
+	// greet_everyone_driver(c)
+	greet_with_deadline_driver(c, 1*time.Second)
+	greet_with_deadline_driver(c, 5*time.Second)
 }

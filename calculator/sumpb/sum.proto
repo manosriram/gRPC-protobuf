@@ -16,6 +16,16 @@ message SumResponse {
     int32 z = 1;
 };
 
+message SquareRootRequest {
+    int32 number = 1;
+};
+
+message SquareRootResponse {
+    double result = 1;
+};
+
 service SumService {
-    rpc Sum(SumRequest) returns (SumResponse);
+    rpc Sum(SumRequest) returns (SumResponse) {};
+
+    rpc SquareRoot(SquareRootRequest) returns (SquareRootResponse) {};
 };

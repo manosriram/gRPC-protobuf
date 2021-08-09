@@ -19,6 +19,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type SumServiceClient interface {
 	Sum(ctx context.Context, in *SumRequest, opts ...grpc.CallOption) (*SumResponse, error)
+	SquareRoot(ctx context.Context, in *SquareRootRequest, opts ...grpc.CallOption) (*SquareRootResponse, error)
 }
 
 type sumServiceClient struct {
@@ -38,11 +39,21 @@ func (c *sumServiceClient) Sum(ctx context.Context, in *SumRequest, opts ...grpc
 	return out, nil
 }
 
+func (c *sumServiceClient) SquareRoot(ctx context.Context, in *SquareRootRequest, opts ...grpc.CallOption) (*SquareRootResponse, error) {
+	out := new(SquareRootResponse)
+	err := c.cc.Invoke(ctx, "/sum.SumService/SquareRoot", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // SumServiceServer is the server API for SumService service.
 // All implementations must embed UnimplementedSumServiceServer
 // for forward compatibility
 type SumServiceServer interface {
 	Sum(context.Context, *SumRequest) (*SumResponse, error)
+	SquareRoot(context.Context, *SquareRootRequest) (*SquareRootResponse, error)
 	mustEmbedUnimplementedSumServiceServer()
 }
 
@@ -52,6 +63,9 @@ type UnimplementedSumServiceServer struct {
 
 func (UnimplementedSumServiceServer) Sum(context.Context, *SumRequest) (*SumResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Sum not implemented")
+}
+func (UnimplementedSumServiceServer) SquareRoot(context.Context, *SquareRootRequest) (*SquareRootResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SquareRoot not implemented")
 }
 func (UnimplementedSumServiceServer) mustEmbedUnimplementedSumServiceServer() {}
 
@@ -84,6 +98,24 @@ func _SumService_Sum_Handler(srv interface{}, ctx context.Context, dec func(inte
 	return interceptor(ctx, in, info, handler)
 }
 
+func _SumService_SquareRoot_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(SquareRootRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(SumServiceServer).SquareRoot(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/sum.SumService/SquareRoot",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(SumServiceServer).SquareRoot(ctx, req.(*SquareRootRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // SumService_ServiceDesc is the grpc.ServiceDesc for SumService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -95,7 +127,11 @@ var SumService_ServiceDesc = grpc.ServiceDesc{
 			MethodName: "Sum",
 			Handler:    _SumService_Sum_Handler,
 		},
+		{
+			MethodName: "SquareRoot",
+			Handler:    _SumService_SquareRoot_Handler,
+		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "sumpb/sum.proto",
+	Metadata: "calculator/sumpb/sum.proto",
 }
