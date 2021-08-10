@@ -4,19 +4,47 @@ package blog;
 option go_package="blog/blogpb";
 
 message Blog {
-    int32 id = 1;
-    string author = 2;
-    string content = 3;
-};
+    string id = 1;
+    string author_id = 2;
+    string title = 3;
+    string content = 4;
+}
 
 message CreateBlogRequest {
     Blog blog = 1;
 };
 
 message CreateBlogResponse {
-    bool created = 1;
+    Blog blog = 1;
+};
+
+message UpdateBlogRequest {
+    Blog blog = 1;
+};
+
+message UpdateBlogResponse {
+    Blog blog = 1;
+};
+
+message DeleteBlogRequest {
+    string doc_id = 1;
+};
+
+message DeleteBlogResponse {
+    int32 deleted_count = 1;
+};
+
+message ReadBlogRequest {
+    string doc_id = 1;
+};
+
+message ReadBlogResponse {
+    Blog blog = 1;
 };
 
 service BlogService {
     rpc Create(CreateBlogRequest) returns (CreateBlogResponse) {};
+    rpc Update(UpdateBlogRequest) returns (UpdateBlogResponse) {};
+    rpc Delete(DeleteBlogRequest) returns (DeleteBlogResponse) {};
+    rpc Read(ReadBlogRequest) returns (ReadBlogResponse) {};
 };
